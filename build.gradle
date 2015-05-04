@@ -1,0 +1,34 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven'
+apply plugin: 'application'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group = 'bragaglia'
+version = '0.0.1-SNAPSHOT'
+mainClassName = 'example.Application'
+
+// applicationDefaultJvmArgs = [ "-Xmx4G" ]
+
+run {
+//    args '-i file -o output'.split()
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+def vSLF4j = "1.7.12"
+def vLogBack = "1.1.3"
+
+dependencies {
+    compile "org.slf4j:slf4j-api:${vSLF4j}"
+    compile "ch.qos.logback:logback-classic:${vLogBack}"
+    compile "ch.qos.logback:logback-core:${vLogBack}"
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.assertj:assertj-core:3.0.0'
+}
