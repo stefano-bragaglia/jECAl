@@ -13,5 +13,6 @@ public interface Analysis {
 	int getOccurrences(String token);
 	Collection<Entry<String, Integer>> getVector();
 	String getParent();
+	String getConfig();
 
 }

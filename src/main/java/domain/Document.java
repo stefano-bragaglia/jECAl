@@ -11,4 +11,6 @@ public interface Document {
 
 	String getParent();
 
+	String getContent();
+
 }

@@ -7,13 +7,7 @@ import java.util.Objects;
  */
 public class SpaceImpl implements Space {
 
-	private String id;
-
 	private String name;
-
-	@Deprecated
-	public SpaceImpl() {
-	}
 
 	public SpaceImpl(String name) {
 		Objects.requireNonNull(name);
@@ -40,7 +34,7 @@ public class SpaceImpl implements Space {
 	@Override
 	public String toString() {
 		String result = "SpaceImpl{" +
-				"id='" + id + '\'' +
+				"id='" + super.toString() + '\'' +
 				", name='" + name + '\'' +
 				'}';
 		checkConsistency();

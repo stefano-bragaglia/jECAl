@@ -7,25 +7,23 @@ import java.util.Objects;
  */
 public class DocumentImpl implements Document {
 
-	private String id;
-
 	private String name;
 
 	private String parent;
 
-	@Deprecated
-	public DocumentImpl() {
-	}
+	private String content;
 
-	public DocumentImpl(String name, Space space) {
+	public DocumentImpl(String name, String content, Space space) {
 		Objects.requireNonNull(name);
 		if ((name = name.trim()).isEmpty()) {
 			throw new IllegalArgumentException("'name' is empty");
 		}
+		Objects.requireNonNull(content);
 		Objects.requireNonNull(space);
 
 		this.name = name;
 		this.parent = space.getId();
+		this.content = content;
 		checkConsistency();
 	}
 
@@ -48,11 +46,18 @@ public class DocumentImpl implements Document {
 	}
 
 	@Override
+	public String getContent() {
+		checkConsistency();
+		return content;
+	}
+
+	@Override
 	public String toString() {
 		String result = "DocumentImpl{" +
-				"id='" + id + '\'' +
+				"id='" + super.toString() + '\'' +
 				", name='" + name + '\'' +
 				", parent='" + parent + '\'' +
+				", content='" + content + '\'' +
 				'}';
 		checkConsistency();
 		return result;
@@ -61,6 +66,7 @@ public class DocumentImpl implements Document {
 	private void checkConsistency() {
 		assert nameIsValid() : "'name' is not valid (null or empty)";
 		assert parentIsValid() : "'parent' is not valid (null or empty)";
+		assert contentIsNotNull() : "'content' is null";
 	}
 
 	private boolean nameIsValid() {
@@ -71,4 +77,7 @@ public class DocumentImpl implements Document {
 		return !(null == parent || parent.isEmpty());
 	}
 
+	private boolean contentIsNotNull() {
+		return null != content;
+	}
 }

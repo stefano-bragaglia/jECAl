@@ -4,7 +4,9 @@ import java.util.*;
 
 import core.ECAEngine;
 import core.Event;
+import example.AnalyseDocument;
 import example.DeleteWholeSpace;
+import example.ReanalyseDocument;
 
 /**
  * TODO Add some meaningful class description...
@@ -16,6 +18,7 @@ public class ServiceImpl implements Service {
 	 * Prevents instantiation from other classes.
 	 */
 	private ServiceImpl() {
+		this.configs = new HashMap<>();
 		this.spaces = new HashMap<>();
 		this.documents = new HashMap<>();
 		this.analyses = new HashMap<>();
@@ -44,11 +47,21 @@ public class ServiceImpl implements Service {
 		return ServiceImplHolder.INSTANCE;
 	}
 
+	private Map<String, Config> configs;
+
 	private Map<String, Space> spaces;
 
 	private Map<String, Document> documents;
 
 	private Map<String, Analysis> analyses;
+
+	@Override
+	public void delete(Config config) {
+		Objects.requireNonNull(config);
+
+		spaces.remove(config.getId());
+		checkConsistency();
+	}
 
 	@Override
 	@Event(DeleteWholeSpace.class)
@@ -76,6 +89,17 @@ public class ServiceImpl implements Service {
 	}
 
 	@Override
+	public Config get() {
+		Config result = null;
+		for (Config config : configs.values()) {
+			result = config;
+			break;
+		}
+		checkConsistency();
+		return result;
+	}
+
+	@Override
 	public Collection<Space> find() {
 		checkConsistency();
 		return spaces.values();
@@ -97,19 +121,34 @@ public class ServiceImpl implements Service {
 	}
 
 	@Override
-	public Analysis find(Document document) {
+	public Analysis find(Document document, Config config) {
 		Objects.requireNonNull(document);
+		Objects.requireNonNull(config);
 
 		Analysis result = null;
 		final String id = document.getId();
+		final String cfg = config.getId();
 		for (Analysis analysis : analyses.values()) {
-			if (id.equals(analysis.getParent())) {
+			if (id.equals(analysis.getParent()) && cfg.equals(analysis.getConfig())) {
 				result = analysis;
 				break;
 			}
 		}
 		checkConsistency();
 		return result;
+	}
+
+	@Override
+	@Event(ReanalyseDocument.class)
+	public Config save(Config config) {
+		Objects.requireNonNull(config);
+
+		for (Config exConfig : configs.values()) {
+			delete(exConfig);
+		}
+		configs.put(config.getId(), config);
+		checkConsistency();
+		return config;
 	}
 
 	@Override
@@ -122,6 +161,7 @@ public class ServiceImpl implements Service {
 	}
 
 	@Override
+	@Event(AnalyseDocument.class)
 	public Document save(Document document) {
 		Objects.requireNonNull(document);
 
@@ -142,7 +182,8 @@ public class ServiceImpl implements Service {
 	@Override
 	public String toString() {
 		String result = "Service{" +
-				"spaces=" + spaces +
+				"configs=" + configs +
+				", spaces=" + spaces +
 				", documents=" + documents +
 				", analyses=" + analyses +
 				'}';
@@ -151,9 +192,14 @@ public class ServiceImpl implements Service {
 	}
 
 	private void checkConsistency() {
+		assert configsIsZeroOrOne() : "'configs' are too many";
 		assert spacesIsNotNull() : "'spaces' is null";
 		assert documentsIsNotNull() : "'documents' is null";
 		assert analysesIsNotNull() : "'analyses' is null";
+	}
+
+	private boolean configsIsZeroOrOne() {
+		return null != configs && configs.size() <= 1;
 	}
 
 	private boolean spacesIsNotNull() {
